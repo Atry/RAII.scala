@@ -77,7 +77,7 @@ object future {
     type AsyncReleasable[A] = ResourceT[Future, A]
 
     def apply[A](run: Future[AsyncReleasable[Try[A]]]): Do[A] = {
-      DoExtractor(TryT(ResourceFactoryT(run)))
+      DoExtractor(TryT[RAIIFuture,A](ResourceFactoryT(run)))
     }
 
     private[raii] def unwrap[F[_], A](doA: Do[A]): Future[AsyncReleasable[Try[A]]] = {
