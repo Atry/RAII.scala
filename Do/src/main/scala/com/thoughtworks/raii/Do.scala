@@ -46,16 +46,15 @@ object future {
 
     override private[raii] def unwrap[F[_], A](doa: TryT[RAIIFuture, A]): TryT[RAIIFuture, A] = doa
 
-    import com.thoughtworks.raii.transformers.ResourceFactoryT.resourceFactoryTMonad
-    import com.thoughtworks.raii.transformers.ResourceFactoryT.resourceFactoryTMonadError
-    import com.thoughtworks.raii.transformers.ResourceFactoryT.resourceFactoryTParallelApplicative
-    import TryT.tryTParallelApplicative
-    import Future.futureInstance
-    import TryT.tryTMonadError
-    import Future.futureParallelApplicativeInstance
-    override def doMonadErrorInstances: MonadError[TryT[RAIIFuture, ?], Throwable] = implicitly
+    override def doMonadErrorInstances: MonadError[TryT[RAIIFuture, ?], Throwable] =
+      TryT.tryTMonadError[RAIIFuture](ResourceFactoryT.resourceFactoryTMonad[Future](Future.futureInstance))
 
-    override def doParallelApplicative(implicit throwableSemigroup: Semigroup[Throwable]) = implicitly
+    override def doParallelApplicative(implicit throwableSemigroup: Semigroup[Throwable]) = {
+      import com.thoughtworks.raii.transformers.ResourceFactoryT.resourceFactoryTParallelApplicative
+      import TryT.tryTParallelApplicative
+      import Future.futureParallelApplicativeInstance
+      implicitly
+    }
   }
 
   type Do[A] = DoExtractor.Do[A]
@@ -77,7 +76,7 @@ object future {
     type AsyncReleasable[A] = ResourceT[Future, A]
 
     def apply[A](run: Future[AsyncReleasable[Try[A]]]): Do[A] = {
-      DoExtractor(TryT[RAIIFuture,A](ResourceFactoryT(run)))
+      DoExtractor(TryT[RAIIFuture, A](ResourceFactoryT(run)))
     }
 
     private[raii] def unwrap[F[_], A](doA: Do[A]): Future[AsyncReleasable[Try[A]]] = {
