@@ -178,7 +178,7 @@ class sharedSpec extends AsyncFreeSpec with Matchers with Inside {
     val allOpenedResources = mutable.HashMap.empty[String, FakeResource]
     val mr0 = managedT[Continuation, FakeResource](new FakeResource(allOpenedResources, "r0"))
     allOpenedResources.keys shouldNot contain("r0")
-    val asynchronousResource: Continuation[Unit] = using[Continuation, FakeResource, Unit](mr0, r0 => {
+    val asynchronousResource: Continuation[Assertion] = using[Continuation, FakeResource, Assertion](mr0, r0 => {
       Continuation.delay {
         events += "using r0"
         allOpenedResources("r0") should be(r0)
@@ -203,7 +203,7 @@ class sharedSpec extends AsyncFreeSpec with Matchers with Inside {
       val mr0 = managedT[Future, FakeResource](new FakeResource(allOpenedResources, "r0"))
       allOpenedResources.keys shouldNot contain("r0")
 
-      val asynchronousResource: Future[Unit] = using[Future, FakeResource, Unit](mr0, r0 => {
+      val asynchronousResource: Future[Assertion] = using[Future, FakeResource, Assertion](mr0, r0 => {
         Future.delay {
           events += "using r0"
           allOpenedResources("r0") should be(r0)
@@ -215,7 +215,7 @@ class sharedSpec extends AsyncFreeSpec with Matchers with Inside {
         case scala.util.Failure(e) =>
           p.failure(e)
           Trampoline.done(())
-        case Success(()) =>
+        case Success(_) =>
           p.success {
             allOpenedResources.keys shouldNot contain("r0")
             events should be(Seq("using r0"))
@@ -593,16 +593,21 @@ class sharedSpec extends AsyncFreeSpec with Matchers with Inside {
 
     val p = Promise[Assertion]
 
-    Continuation.run(future) { either =>
-      inside(either) {
+    Continuation
+      .run(future) {
         case Success(value) =>
-          p.success {
-            value should be("011")
-            events should be(Seq("using a & b & c"))
+          Trampoline.delay {
+            val _ = p.success {
+              value should be("011")
+              events should be(Seq("using a & b & c"))
+            }
           }
-          Trampoline.done(())
+        case scala.util.Failure(e) =>
+          Trampoline.delay {
+            val _ = p.failure(e)
+          }
       }
-    }
+      .run
 
     val allReleaseCallBack = mutable.HashMap.empty[String, Unit => Trampoline[Unit]]
 

@@ -47,7 +47,8 @@ object covariant {
     *          val resource: RAII[File] = ResourceT(Name(new Releasable[Name, File] {
     *            override val value: File = File.createTempFile("test", ".tmp");
     *            override def release(): Name[Unit] = Name {
-    *              value.delete()
+    *              val deleted = value.delete()
+    *              assert(deleted)
     *            }
     *          }))
     *          }}}

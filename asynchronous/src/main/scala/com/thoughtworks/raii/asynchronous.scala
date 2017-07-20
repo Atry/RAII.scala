@@ -317,7 +317,7 @@ object asynchronous {
       delay(Continuation.shift { handler: (Unit => Trampoline[Unit]) =>
         Trampoline.delay {
           executorContext.execute { () =>
-            handler(())
+            handler(()).run
           }
         }
       })

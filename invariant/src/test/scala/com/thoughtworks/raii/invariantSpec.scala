@@ -125,7 +125,7 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
       events += s"acquire $id"
 
       override def close(): Unit = {
-        events += s"release $id"
+        val _ = events += s"release $id"
       }
     }
 
@@ -133,7 +133,7 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
 
     try {
       val ioResource: ResourceT[IO, MyResource] = mr.map { r =>
-        events += "error is coming"
+        val _ = events += "error is coming"
         throw Boom()
         r
       }
@@ -162,7 +162,7 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
       events += s"acquire $id"
 
       override def close(): Unit = {
-        events += s"release $id"
+        val _ = events += s"release $id"
         throw Boom()
       }
     }
@@ -196,7 +196,7 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
       events += s"acquire $id"
 
       override def close(): Unit = {
-        events += s"release $id"
+        val _ = events += s"release $id"
         throw Boom()
       }
     }
@@ -232,7 +232,7 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
       events += s"acquire $id"
 
       override def close(): Unit = {
-        events += s"release $id"
+        val _ = events += s"release $id"
       }
 
       def generateData() = Some(math.random)

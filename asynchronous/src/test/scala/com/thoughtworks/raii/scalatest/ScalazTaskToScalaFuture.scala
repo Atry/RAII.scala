@@ -13,7 +13,7 @@ trait ScalazTaskToScalaFuture {
     val promise = Promise[A]
     com.thoughtworks.future.Future.run(task) { either =>
       Trampoline.delay { promise.complete(either) }
-    }
+    }.run
     promise.future
   }
 
