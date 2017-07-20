@@ -92,7 +92,6 @@ final class invariantSpec extends AsyncFreeSpec with Matchers with Inside {
 
   import scalaz.syntax.all._
   import com.thoughtworks.raii.invariant.ResourceT._
-  import scalaz.concurrent.Future._
 
   "must acquire and release" in {
     val allOpenedResources = mutable.HashMap.empty[String, FakeResource]

@@ -45,7 +45,7 @@ lazy val invariantJVM = invariant.jvm.addSbtFiles(file("../build.sbt.shared"))
 lazy val invariantJS = invariant.js.addSbtFiles(file("../build.sbt.shared"))
 
 lazy val shared =
-  project.dependsOn(covariantJVM)
+  project.dependsOn(covariantJVM, ProjectRef(file("Future.scala"), "futureJVM"))
 
 lazy val asynchronous = project.dependsOn(shared, covariantJVM)
 
